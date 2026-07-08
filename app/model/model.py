@@ -10,6 +10,8 @@ class Activity(base):
     name = Column(String, nullable=False)
     description = Column(String, nullable=True)
     user_id = Column(Integer, nullable=False, default=1)  # Assuming a default user_id for demonstration
+    
+    fish_data = relationship("FishData", back_populates="activity")
 
 class FishData(base):
     __tablename__ = "fish_data"
