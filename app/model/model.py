@@ -11,7 +11,7 @@ class Activity(base):
     description = Column(String, nullable=True)
     user_id = Column(Integer, nullable=False, default=1)  # Assuming a default user_id for demonstration
     
-    fish_data = relationship("FishData", back_populates="activity")
+    fish_data = relationship("FishData", back_populates="activity", cascade="all, delete-orphan")
 
 class FishData(base):
     __tablename__ = "fish_data"
