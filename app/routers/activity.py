@@ -12,7 +12,7 @@ def get_activities(db: Session = Depends(get_db)):
     activities = db.query(model.Activity).all()
     return activities
 
-@router.post("/activities", response_model=ActivityOutputSchema)
+@router.post("/", response_model=ActivityOutputSchema)
 def create_activity(activity: ActivityCreateSchema, db: Session = Depends(get_db)):
     db_activity = model.Activity(
         name=activity.name,
