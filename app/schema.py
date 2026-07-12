@@ -1,6 +1,5 @@
-import enum
 from pydantic import BaseModel, Field
-import numpy as np
+from app.model.model import File
 import uuid
     
 class ActivitySchema(BaseModel):
@@ -38,6 +37,7 @@ class FishDataSchema(BaseModel):
     behavior: str = Field(None, description="Behavior of the fish", optional=True)
     note: str = Field(None, description="Additional notes about the fish", optional=True)
     name: str = Field(None, description="Name of the fish", optional=True)
+    file: File = Field(None, description="File data information of the fish")
 
     class Config:
         orm_mode = True
@@ -50,6 +50,7 @@ class FishDataCreateSchema(BaseModel):
     behavior: str = Field(None, description="Behavior of the fish", optional=True)
     note: str = Field(None, description="Additional notes about the fish", optional=True)
     name: str = Field(None, description="Name of the fish", optional=False)
+    file: File = Field(None, description="data file information of the fish")
 
     class Config:
         orm_mode = True

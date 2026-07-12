@@ -11,29 +11,36 @@ router = APIRouter()
 def createFish(fish: FishDataCreateSchema, db: Session = Depends(get_db)):
     
     if fish.activity_id:
-        activity = db.query(model.Activity).filter(id==fish.activity_id).first()
-        
+        activity = db.query(model.Activity).filter(model.Activity.id==fish.activity_id).first()
+        print(activity)
         if not activity:
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="There is no activity with that id")
     
-    db_fish = model.FishData(
-        activity_id = fish.activity_id,
-        length = fish.length,
-        weight = fish.weight,
-        species = fish.species,
-        behavior = fish.behavior,
-        note = fish.note,
-        name = fish.name,
-    )
-    
     try:
+        db_fish = model.FishData(
+            activity_id = fish.activity_id,
+            length = fish.length,
+            weight = fish.weight,
+            species = fish.species,
+            behavior = fish.behavior,
+            note = fish.note,
+            name = fish.name,
+            file = fish.file.model_dump()
+        )
+
         db.add(db_fish)
         db.commit()
         db.refresh(db_fish)
-    except:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="an error occured")
+
+        return db_fish
+    except Exception as e:
+        print("there was an error in the code")
+        print(e)
+
+        db.rollback()
+
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Database error {e}")
     
-    return db_fish
     
 @router.get("/fishs", response_model=List[FishDataSchema])
 def getAllFishs(db:Session = Depends(get_db)):
