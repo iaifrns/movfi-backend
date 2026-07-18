@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from app.schema import ActivityOutputSchema, ActivityCreateSchema
@@ -23,3 +23,18 @@ def create_activity(activity: ActivityCreateSchema, db: Session = Depends(get_db
     db.commit()
     db.refresh(db_activity)
     return db_activity
+
+@router.get(path='/get_one',response_model=ActivityOutputSchema)
+def get_one_activity(db:Session = Depends(get_db)):
+    activity = db.query(model.Activity).one()
+
+    return activity
+
+@router.get(path='/get_activity_by_id/:activityId')
+def get_one_activity_id(activityId: str, db:Session = Depends(get_db)):
+    try:
+        activity = db.query(model.Activity).filter(model.Activity.id == activityId).one()
+
+        return activity
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"System error {e}")

@@ -47,3 +47,15 @@ def getAllFishs(db:Session = Depends(get_db)):
     fishs = db.query(model.FishData).all()
     
     return fishs
+
+@router.get("/fishs/{activityId}", response_model=List[FishDataSchema])
+def getFishsByActivity(activityId:str, db:Session = Depends(get_db)):
+    try:
+        activId = activityId
+
+        fishs = db.query(model.FishData).filter(model.FishData.activity_id == activId).all()
+
+        return fishs
+
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Database error {e}")
