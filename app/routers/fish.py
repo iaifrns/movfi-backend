@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.schema import FishDataCreateSchema, FishDataSchema
+from app.schema import FishDataCreateSchema, FishDataSchema, FishDataUpdate
 from sqlalchemy.orm import Session
 import app.model.model as model
 from typing import List
@@ -59,3 +59,25 @@ def getFishsByActivity(activityId:str, db:Session = Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Database error {e}")
+
+@router.put('/modify/{fish_id}', response_model=FishDataSchema)
+def modifyFishInfo(fish_id: str, fishInfo: FishDataUpdate, db:Session = Depends(get_db)):
+    try:
+        fish = db.query(model.FishData).filter(model.FishData.id == fish_id).first()
+
+        if not fish:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        fish.name = fishInfo.name
+        fish.species = fishInfo.species
+        fish.weight = fishInfo.weight
+        fish.length = fishInfo.length
+        fish.behavior = fishInfo.behavior
+        fish.note = fishInfo.note
+
+        db.commit()
+        db.refresh(fish)
+
+        return fish
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"an error occred {e}")
