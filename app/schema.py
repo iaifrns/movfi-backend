@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 from app.model.model import File
 import uuid
+from datetime import datetime
+from typing import List, Any, Dict
     
 class ActivitySchema(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), description="Unique identifier for the activity")
@@ -72,6 +74,31 @@ class FishDataUpdate(BaseModel):
     
     class Config:
         orm_mode = True
+
+class FileDataSchema(BaseModel):
+    id: str
+    file_name: str = Field(None)
+    data: List[Dict[str, Any]]
+    fish_id: str
+    create_at: datetime
+    expires_at: datetime
+    last_accessed: datetime
+    access_count: int
+
+class FileDataCreateSchema(BaseModel):
+    file_name: str = Field(None)
+    data: List[Dict[str, Any]]
+    fish_id: str
+
+class QuickStartCreate(BaseModel):
+    fish: FishDataCreateSchema
+    activity: ActivityCreateSchema
+    file_data: FileDataCreateSchema
+
+class QuickStartResponse(BaseModel):
+    fish: FishDataSchema
+    activity: ActivitySchema
+    file_data: FileDataSchema
 
 """ class SegmentGrowth(str,enum):
     data: np.ndarray

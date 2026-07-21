@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.schema import FishDataCreateSchema, FishDataSchema, FishDataUpdate
+from app.schema import FishDataCreateSchema, FishDataSchema, FishDataUpdate, FileDataCreateSchema, FileDataSchema
 from sqlalchemy.orm import Session
 import app.model.model as model
 from typing import List
@@ -40,8 +40,32 @@ def createFish(fish: FishDataCreateSchema, db: Session = Depends(get_db)):
         db.rollback()
 
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Database error {e}")
-    
-    
+
+@router.post('/set_file_data', response_model=FileDataSchema)
+def SetFileData(file_data: FileDataCreateSchema, db:Session = Depends(get_db)):
+    try:
+        fish_id = file_data.file_data_id
+
+        fish = db.query(model.FishData).filter(model.FishData.id == fish_id).first()
+
+        if not fish:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"There is no fish info with the id provided")
+        
+        file_info = model.FileData(
+            file_name = file_data.file_name,
+            data= file_data.data,
+            fish_id = file_data.fish_id,
+        )
+
+        db.add(file_info)
+        db.commit()
+        db.refresh(file_info)
+
+    except Exception as e:
+        db.rollback()
+
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"something when wrong {e}")
+
 @router.get("/fishs", response_model=List[FishDataSchema])
 def getAllFishs(db:Session = Depends(get_db)):
     fishs = db.query(model.FishData).all()
