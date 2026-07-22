@@ -46,19 +46,21 @@ def quickStart(data: QuickStartCreate, db:Session = Depends(get_db)):
                 db.commit()
                 db.flush()
                 db.refresh(activity)
+                
+                return {'activity':activity, 'fish':fish, 'file_data':file_info}
 
             except Exception as e:
                 db.rollback()
 
-                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"an Error occured {e}")
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"an Error occured 3 {e}")
 
 
         except Exception as e:
             db.rollback()
 
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"an Error occured {e}")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"an Error occured 2 {e}")
 
     except Exception as e:
         db.rollback()
 
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"an Error occured {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"an Error occured 1 {e}")

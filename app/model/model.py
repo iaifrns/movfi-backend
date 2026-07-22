@@ -58,8 +58,8 @@ class FileData(base):
     data= Column(JSONB, nullable=False)
     fish_id = Column(String, ForeignKey("fish_data.id", ondelete="CASCADE"), nullable=False)
     create_at = Column(DateTime, server_default=func.now())
-    expires_at = Column(DateTime, default=lambda: datetime.utcnow + timedelta(days=7))
-    last_accessed = Column(DateTime, nullable=True, default= lambda: datetime.utcnow)
+    expires_at = Column(DateTime, default=lambda: datetime.utcnow() + timedelta(days=7))
+    last_accessed = Column(DateTime, nullable=True, default= lambda: datetime.utcnow())
     access_count = Column(Integer, default=0)
 
     fish_data = relationship("FishData", back_populates='fish_data')

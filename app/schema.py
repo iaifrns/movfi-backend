@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from app.model.model import File
 import uuid
 from datetime import datetime
-from typing import List, Any, Dict
+from typing import List, Any, Dict, Union
     
 class ActivitySchema(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), description="Unique identifier for the activity")
@@ -87,7 +87,11 @@ class FileDataSchema(BaseModel):
 
 class FileDataCreateSchema(BaseModel):
     file_name: str = Field(None)
-    data: List[Dict[str, Any]]
+    data: List[Dict[str, float]]  # If all values are numbers
+    # OR
+    data: List[Dict[str, Union[float, int, str]]]  # If mixed types
+    # OR most flexible
+    data: List[Dict[str, Any]]  # Accept anything
     fish_id: str
 
 class QuickStartCreate(BaseModel):

@@ -61,6 +61,8 @@ def SetFileData(file_data: FileDataCreateSchema, db:Session = Depends(get_db)):
         db.commit()
         db.refresh(file_info)
 
+        return file_info
+
     except Exception as e:
         db.rollback()
 
