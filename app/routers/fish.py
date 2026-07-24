@@ -42,7 +42,7 @@ def createFish(fish: FishDataCreateSchema, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Database error {e}")
 
 @router.post('/set_file_data', response_model=FileDataSchema)
-def SetFileData(file_data: FileDataCreateSchema, db:Session = Depends(get_db)):
+def setFileData(file_data: FileDataCreateSchema, db:Session = Depends(get_db)):
     try:
         fish_id = file_data.file_data_id
 
@@ -67,6 +67,21 @@ def SetFileData(file_data: FileDataCreateSchema, db:Session = Depends(get_db)):
         db.rollback()
 
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"something when wrong {e}")
+
+@router.get('/get_file_data_by_fish/{fish_id}', response_model=List[FileDataSchema])
+def getFillDataByFile(fish_id: str, db:Session = Depends(get_db)):
+    try:
+        fish = db.query(model.FishData).filter(model.FishData.id == fish_id).first()
+
+        if not fish:
+            raise HTTPException(status_code=404, detail="there is no fish with this id")
+        
+        file_data = db.query(model.FileData).filter(model.FileData.fish_id == fish.id).all()
+
+        return file_data
+    
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occured {e}")
 
 @router.get("/fishs", response_model=List[FishDataSchema])
 def getAllFishs(db:Session = Depends(get_db)):
