@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import app.model.model as model
 from app.config.database import engine
-from app.routers import activity, fish, quick_start
+from app.routers import activity, fish, quick_start, segment_growth
 
 model.base.metadata.create_all(bind=engine)
 
@@ -25,4 +25,5 @@ app.add_middleware(
 app.include_router(activity.router, prefix="/api/activity", tags=["Activity"])
 app.include_router(fish.router, prefix="/api/fish", tags=['Fish'] )
 app.include_router(quick_start.router, prefix="/api/quick_start", tags=['Quick Start'] )
+app.include_router(segment_growth.router, prefix="/api/segment", tags=['Segmentation Algorithm'] )
         

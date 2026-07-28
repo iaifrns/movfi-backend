@@ -92,7 +92,6 @@ def segment_growing(
     i = 1
     j_prev = 0 if free_index == 0 else joint_positions[free_index - 1]
 
-
     # continue while there are unmeasured points and the previous joint is not at the end
     while i < (num_rows - j_prev) and j_prev < (num_rows-2):
 
