@@ -34,9 +34,15 @@ class FishData(base):
     weight = Column(Float, nullable=True)
     species = Column(String, nullable=True)
     behavior = Column(String, nullable=True)
-    note = Column(String, nullable=True)
     name = Column(String, nullable=True)
     file = Column(JSONB, nullable=True)
+
+    body_points = Column(Integer, nullable=True)
+    fps = Column(Float, nullable=True)
+    duration = Column(Float, nullable=True)
+    max_amplitude = Column(Float, nullable=True)
+    tail_beat_frequency = Column(Float, nullable=True)
+    wave_length = Column(Float, nullable=True)
     
     activity = relationship('Activity', back_populates="fish_data")
     fish_data = relationship("FileData", back_populates="fish_data", cascade="all, delete-orphan")

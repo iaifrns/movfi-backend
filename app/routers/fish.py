@@ -17,15 +17,26 @@ def createFish(fish: FishDataCreateSchema, db: Session = Depends(get_db)):
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="There is no activity with that id")
     
     try:
+
+        if fish.file is not None:
+            file_data = fish.file.model_dump()
+        else:
+            file_data = None
+
         db_fish = model.FishData(
             activity_id = fish.activity_id,
             length = fish.length,
             weight = fish.weight,
             species = fish.species,
             behavior = fish.behavior,
-            note = fish.note,
             name = fish.name,
-            file = fish.file.model_dump()
+            file = file_data,
+            body_points = fish.body_points,
+            fps = fish.fps,
+            duration = fish.duration,
+            max_amplitude = fish.max_amplitude,
+            tail_beat_frequency = fish.tail_beat_frequency,
+            wave_length = fish.wave_length
         )
 
         db.add(db_fish)

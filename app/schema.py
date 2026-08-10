@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from app.model.model import File
 import uuid
 from datetime import datetime
-from typing import List, Any, Dict, Union
+from typing import List, Any, Dict, Union, Optional
     
 class ActivitySchema(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), description="Unique identifier for the activity")
@@ -44,9 +44,15 @@ class FishDataSchema(BaseModel):
     weight: float = Field(None, description="Weight of the fish", optional=True)
     species: str = Field(None, description="Species of the fish", optional=True)
     behavior: str = Field(None, description="Behavior of the fish", optional=True)
-    note: str = Field(None, description="Additional notes about the fish", optional=True)
     name: str = Field(None, description="Name of the fish", optional=True)
-    file: File = Field(None, description="File data information of the fish")
+    file: Optional[File] = Field(None, description="File data information of the fish")
+
+    body_points: int = Field(None, description="Number of body points", optional=True)
+    fps: float = Field(None, description="Frames per second", optional=True)
+    duration: float = Field(None, description="Duration of the recording", optional=True)
+    max_amplitude: float = Field(None, description="Maximum amplitude", optional=True)
+    tail_beat_frequency: float = Field(None, description="Tail beat frequency", optional=True)
+    wave_length: float = Field(None, description="Wave length", optional=True)
 
     class Config:
         orm_mode = True
@@ -57,9 +63,15 @@ class FishDataCreateSchema(BaseModel):
     weight: float = Field(None, description="Weight of the fish", optional=True)
     species: str = Field(None, description="Species of the fish", optional=True)
     behavior: str = Field(None, description="Behavior of the fish", optional=True)
-    note: str = Field(None, description="Additional notes about the fish", optional=True)
     name: str = Field(None, description="Name of the fish", optional=False)
-    file: File = Field(None, description="data file information of the fish")
+    file: Optional[File] = Field(None, description="data file information of the fish", optional=True)
+
+    body_points: int = Field(None, description="Number of body points", optional=True, value=None)
+    fps: float = Field(None, description="Frames per second", optional=True, value=None)
+    duration: float = Field(None, description="Duration of the recording", optional=True, value=None)
+    max_amplitude: float = Field(None, description="Maximum amplitude", optional=True, value=None)
+    tail_beat_frequency: float = Field(None, description="Tail beat frequency", optional=True, value=None)
+    wave_length: float = Field(None, description="Wave length", optional=True, value=None)
 
     class Config:
         orm_mode = True
