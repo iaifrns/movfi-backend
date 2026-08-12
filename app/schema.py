@@ -111,6 +111,10 @@ class QuickStartCreate(BaseModel):
     activity: ActivityCreateSchema
     file_data: FileDataCreateSchema
 
+class QuickStartCreateSimulator(BaseModel):
+    fish: FishDataCreateSchema
+    activity: ActivityCreateSchema
+
 class QuickStartResponse(BaseModel):
     fish: FishDataSchema
     activity: ActivitySchema

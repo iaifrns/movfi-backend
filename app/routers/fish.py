@@ -31,6 +31,7 @@ def createFish(fish: FishDataCreateSchema, db: Session = Depends(get_db)):
             behavior = fish.behavior,
             name = fish.name,
             file = file_data,
+            
             body_points = fish.body_points,
             fps = fish.fps,
             duration = fish.duration,
