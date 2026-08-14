@@ -97,6 +97,17 @@ class FileDataSchema(BaseModel):
     last_accessed: datetime
     access_count: int
 
+class FileDataSchemaResponse(BaseModel):
+    id: str
+    file_name: str = Field(None)
+    data: List[Dict[str, Any]]
+    fish_id: str
+    create_at: datetime
+    expires_at: datetime
+    last_accessed: datetime
+    access_count: int
+    data_length: int
+
 class FileDataCreateSchema(BaseModel):
     file_name: str = Field(None)
     data: List[Dict[str, float]]  # If all values are numbers
@@ -119,6 +130,10 @@ class QuickStartResponse(BaseModel):
     fish: FishDataSchema
     activity: ActivitySchema
     file_data: FileDataSchema
+
+class CustomResponse(BaseModel):
+    joints: list
+    segementation_length: float
 
 """ class SegmentGrowth(str,enum):
     data: np.ndarray

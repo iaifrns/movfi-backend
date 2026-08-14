@@ -1,9 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.schema import FishDataCreateSchema, FishDataSchema, FishDataUpdate, FileDataCreateSchema, FileDataSchema
+from app.schema import FishDataCreateSchema, FishDataSchema, FishDataUpdate, FileDataCreateSchema, FileDataSchema, FileDataSchemaResponse
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 import app.model.model as model
 from typing import List
 from app.db import get_db
+from concurrent.futures import ThreadPoolExecutor
+from app.utils.get_data_from_filedata import fetch_data_point
+from app.config.database import sessionLocal
 
 router = APIRouter()
 
@@ -80,17 +84,64 @@ def setFileData(file_data: FileDataCreateSchema, db:Session = Depends(get_db)):
 
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"something when wrong {e}")
 
-@router.get('/get_file_data_by_fish/{fish_id}', response_model=List[FileDataSchema])
-def getFillDataByFile(fish_id: str, db:Session = Depends(get_db)):
+@router.get('/get_file_data_by_fish/{fish_id}', response_model=List[FileDataSchemaResponse])
+async def getFillDataByFile(fish_id: str, db:Session = Depends(get_db)):
     try:
         fish = db.query(model.FishData).filter(model.FishData.id == fish_id).first()
 
         if not fish:
             raise HTTPException(status_code=404, detail="there is no fish with this id")
         
-        file_data = db.query(model.FileData).filter(model.FileData.fish_id == fish.id).all()
+        file_data = db.query(
+            model.FileData.id,
+            model.FileData.file_name,
+            model.FileData.create_at,
+            func.jsonb_array_length(model.FileData.data).label('count'),
+            model.FileData.access_count,
+            model.FileData.expires_at, 
+            model.FileData.last_accessed).filter(model.FileData.fish_id == fish.id).first()
 
-        return file_data
+        if file_data.count == 0:
+            return [{
+                'id': file_data.id,
+                'file_name': file_data.file_name,
+                'data': [{}],
+                'fish_id': fish.id,
+                'create_at': file_data.create_at,
+                'expires_at': file_data.expires_at,
+                'last_accessed': file_data.last_accessed,
+                'access_count': file_data.access_count,
+                'data_length': file_data.count
+            }]
+
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            # Create a new database session for each thread
+            futures = []
+            for idx in range(0, 15):
+                print(f'{idx}->'+'*'*80)
+                # Each task fetches one element
+                future = executor.submit(
+                    fetch_data_point,
+                    file_data.id, 
+                    idx
+                )
+                futures.append(future)
+        
+            # ✅ Wait for all tasks to complete
+            results = [future.result() for future in futures]
+
+        return [{
+                        'id': file_data.id,
+                        'file_name': file_data.file_name,
+                        'data': results,
+                        'fish_id': fish.id,
+                        'create_at': file_data.create_at,
+                        'expires_at': file_data.expires_at,
+                        'last_accessed': file_data.last_accessed,
+                        'access_count': file_data.access_count,
+                        'data_length': file_data.count
+                    }]
+        
     
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occured {e}")

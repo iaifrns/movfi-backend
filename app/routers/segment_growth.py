@@ -4,6 +4,8 @@ from app.db import get_db
 import app.model.model as model
 import numpy as np
 from app.utils.segment_growth import segment_growing
+from app.utils.segmentation_length import get_segmentation_length
+from app.schema import CustomResponse
 
 router = APIRouter()
 
@@ -52,7 +54,7 @@ def get_all_frames_segment(fish_id: str, db: Session = Depends(get_db)):
         print('*'*80)
         raise HTTPException(status_code=500, detail=f"An error occured {e}")
 
-@router.get('/get_a_segment/{fish_id}', response_model=list)
+@router.get('/get_a_segment/{fish_id}', response_model=CustomResponse)
 def get_segment(fish_id: str, db: Session = Depends(get_db)):
     try:
 
@@ -80,7 +82,12 @@ def get_segment(fish_id: str, db: Session = Depends(get_db)):
             thresh=0.001
         )
 
-        return joint_positions.tolist()
+        segmentation_length = get_segmentation_length(fileData.data, joint_positions.tolist())
+
+        return {
+            'joints': joint_positions.tolist(),
+            'segementation_length': segmentation_length
+        }
     except Exception as e:
         print(e)
         print('*'*80)
