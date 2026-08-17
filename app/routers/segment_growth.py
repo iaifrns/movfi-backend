@@ -6,6 +6,7 @@ import numpy as np
 from app.utils.segment_growth import segment_growing
 from app.utils.segmentation_length import get_segmentation_length
 from app.schema import CustomResponse
+from app.utils.tail_amplitude import get_tail_beat_amplitude
 
 router = APIRouter()
 
@@ -83,10 +84,12 @@ def get_segment(fish_id: str, db: Session = Depends(get_db)):
         )
 
         segmentation_length = get_segmentation_length(fileData.data, joint_positions.tolist())
+        amplitude = get_tail_beat_amplitude(fileData.data[-1])
 
         return {
             'joints': joint_positions.tolist(),
-            'segementation_length': segmentation_length
+            'segementation_length': segmentation_length,
+            'tail_amplitude' : amplitude
         }
     except Exception as e:
         print(e)

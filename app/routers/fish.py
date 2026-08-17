@@ -92,57 +92,63 @@ async def getFillDataByFile(fish_id: str, db:Session = Depends(get_db)):
         if not fish:
             raise HTTPException(status_code=404, detail="there is no fish with this id")
         
-        file_data = db.query(
-            model.FileData.id,
-            model.FileData.file_name,
-            model.FileData.create_at,
-            func.jsonb_array_length(model.FileData.data).label('count'),
-            model.FileData.access_count,
-            model.FileData.expires_at, 
-            model.FileData.last_accessed).filter(model.FileData.fish_id == fish.id).first()
+        file_data = db.query(model.FileData).filter(model.FileData.fish_id == fish.id).first()
 
-        if file_data.count == 0:
-            return [{
-                'id': file_data.id,
-                'file_name': file_data.file_name,
-                'data': [{}],
-                'fish_id': fish.id,
-                'create_at': file_data.create_at,
-                'expires_at': file_data.expires_at,
-                'last_accessed': file_data.last_accessed,
-                'access_count': file_data.access_count,
-                'data_length': file_data.count
-            }]
-
-        with ThreadPoolExecutor(max_workers=5) as executor:
-            # Create a new database session for each thread
-            futures = []
-            for idx in range(0, 15):
-                print(f'{idx}->'+'*'*80)
-                # Each task fetches one element
-                future = executor.submit(
-                    fetch_data_point,
-                    file_data.id, 
-                    idx
-                )
-                futures.append(future)
-        
-            # ✅ Wait for all tasks to complete
-            results = [future.result() for future in futures]
+        data = fetch_data_point(file_data.data, 10)
 
         return [{
-                        'id': file_data.id,
-                        'file_name': file_data.file_name,
-                        'data': results,
-                        'fish_id': fish.id,
-                        'create_at': file_data.create_at,
-                        'expires_at': file_data.expires_at,
-                        'last_accessed': file_data.last_accessed,
-                        'access_count': file_data.access_count,
-                        'data_length': file_data.count
-                    }]
+            'id': file_data.id,
+            'file_name': file_data.file_name,
+            'data': data,
+            'fish_id': fish.id,
+            'create_at': file_data.create_at,
+            'expires_at': file_data.expires_at,
+            'last_accessed': file_data.last_accessed,
+            'access_count': file_data.access_count,
+            'data_length': round(len(file_data.data[0])/2,0)
+        }]
         
     
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occured {e}")
+
+@router.get('/get_all_file_data_by_fish/{fish_id}', response_model=List[FileDataSchemaResponse])
+async def getAllFillDataByFile(fish_id: str, db:Session = Depends(get_db)):
+    try:
+        fish = db.query(model.FishData).filter(model.FishData.id == fish_id).first()
+
+        if not fish:
+            raise HTTPException(status_code=404, detail="there is no fish with this id")
+        
+        file_data = db.query(model.FileData).filter(model.FileData.fish_id == fish.id).first()
+
+        return [{
+            'id': file_data.id,
+            'file_name': file_data.file_name,
+            'data': file_data.data,
+            'fish_id': fish.id,
+            'create_at': file_data.create_at,
+            'expires_at': file_data.expires_at,
+            'last_accessed': file_data.last_accessed,
+            'access_count': file_data.access_count,
+            'data_length': round(len(file_data.data[0])/2,0)
+        }]
+        
+    
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occured {e}")
+
+@router.get('/get_data/{file_id}/{page}', response_model=List)
+def get_data(file_id: str, page: int, db: Session = Depends(get_db)):
+    try:
+        result = db.query(model.FileData.data).filter(model.FileData.id == file_id).all()
+
+        data = result[0][0]
+    
+        paginated_data = fetch_data_point(data, 10, page)
+    
+        return paginated_data
+            
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occured {e}")
 

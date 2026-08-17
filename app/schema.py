@@ -134,6 +134,7 @@ class QuickStartResponse(BaseModel):
 class CustomResponse(BaseModel):
     joints: list
     segementation_length: float
+    tail_amplitude: float
 
 """ class SegmentGrowth(str,enum):
     data: np.ndarray
